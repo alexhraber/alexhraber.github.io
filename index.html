@@ -1,12 +1,45 @@
+---
+---
+{%- comment -%}
+The markers in README.md define the content for each homepage section.
+{%- endcomment -%}
+{%- capture readme -%}{% include_relative README.md %}{%- endcapture -%}
+{%- assign name_parts = readme | split: '<!-- profile:name=' -%}
+{%- assign profile_name = name_parts[1] | split: '-->' | first | strip -%}
+{%- assign given_name = profile_name | split: ' ' | first -%}
+{%- assign family_name = profile_name | remove_first: given_name | strip -%}
+{%- assign role_parts = readme | split: '<!-- profile:roles=' -%}
+{%- assign roles = role_parts[1] | split: '-->' | first | strip -%}
+{%- assign role_items = roles | split: '·' -%}
+
+{%- assign research_parts = readme | split: '<!-- profile:research -->' -%}
+{%- assign research_items = research_parts[1] | split: '<!-- /profile:research -->' | first | split: '<li>' -%}
+{%- assign tools_parts = readme | split: '<!-- profile:tools -->' -%}
+{%- assign tool_items = tools_parts[1] | split: '<!-- /profile:tools -->' | first | split: '<img ' -%}
+{%- assign domains_parts = readme | split: '<!-- profile:domains -->' -%}
+{%- assign domains = domains_parts[1] | split: '<!-- /profile:domains -->' | first | split: '·' -%}
+{%- assign contact_parts = readme | split: '<!-- profile:contact -->' -%}
+{%- assign contact_links = contact_parts[1] | split: '<!-- /profile:contact -->' | first | split: '<a ' -%}
+{%- for contact_link in contact_links offset:1 -%}
+  {%- assign tag = contact_link | split: '>' | first -%}
+  {%- if tag contains 'data-profile-resume' -%}
+    {%- assign resume_url = tag | split: 'href="' | last | split: '"' | first -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- assign artwork_parts = readme | split: '<pre>' -%}
+{%- assign banner = artwork_parts[1] | split: '</pre>' | first | default: '' -%}
+{%- assign artwork = banner | remove: '<!-- profile:portrait -->' | remove: '<!-- /profile:portrait -->' -%}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#100e0d">
-  <meta name="description" content="Alex Raber, founder, engineer, architect, and researcher. Selected research, tools, and contact information.">
+  <meta name="description" content="{{ profile_name | escape_once }}. {{ roles | escape_once }}. Selected research, tools, and contact information.">
   <link rel="canonical" href="https://alexhraber.github.io/">
-  <title>Alex Raber</title>
+  <title>{{ profile_name | escape_once }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&amp;family=DM+Sans:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
@@ -16,203 +49,116 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header frame">
-    <a class="wordmark" href="#top"><span aria-hidden="true">✦</span> Alex Raber</a>
+    <a class="wordmark" href="#top"><span aria-hidden="true">✦</span> {{ profile_name | escape_once }}</a>
     <nav aria-label="Main navigation">
-      <a href="#research">Research</a>
-      <a href="#toolkit">Toolkit</a>
-      <a href="#contact">Contact</a>
+      {% if research_items.size > 1 %}<a href="#research">Research</a>{% endif %}
+      {% if tool_items.size > 1 or domains.size > 0 %}<a href="#toolkit">Toolkit</a>{% endif %}
+      {% if contact_links.size > 1 %}<a href="#contact">Contact</a>{% endif %}
     </nav>
   </header>
 
   <main id="main" class="frame">
     <section class="hero" aria-labelledby="name">
       <div class="hero-copy">
-        <h1 id="name">Alex <span>Raber<span class="name-period" aria-hidden="true">.</span></span></h1>
-        <p class="roles">Founder <span>·</span> Engineer <span>·</span> Architect <span>·</span> Researcher</p>
+        <h1 id="name">{{ given_name | escape_once }}{% if family_name != empty %} <span>{{ family_name | escape_once }}<span class="name-period" aria-hidden="true">.</span></span>{% endif %}</h1>
+        {% if role_items.size > 0 %}
+        <p class="roles">{% for role in role_items %}{% unless forloop.first %} <span>·</span> {% endunless %}{{ role | strip | escape_once }}{% endfor %}</p>
+        {% endif %}
         <div class="hero-actions">
-          <a class="button button-primary" href="#research">Explore research <span aria-hidden="true">↓</span></a>
-          <a class="button button-secondary" href="./assets/alex-raber-resume.pdf">Résumé <span aria-hidden="true">↗</span></a>
+          {% if research_items.size > 1 %}<a class="button button-primary" href="#research">Explore research <span aria-hidden="true">↓</span></a>{% endif %}
+          {% if resume_url %}<a class="button button-secondary" href="{{ resume_url | escape_once }}">Résumé <span aria-hidden="true">↗</span></a>{% endif %}
         </div>
       </div>
-      <figure class="portrait" role="img" aria-label="ASCII portrait of Alex Raber">
-        <span class="portrait-registration" aria-hidden="true"></span>
-        <pre aria-hidden="true">                    ahr*#%###*=-.
-              ..-#@@@@@@@@@@@@@@@#=:..
-             ..=@@@@@@@@@@@@@@@@@@@@@*:...
-           ..:%@@@@@@@@@@@@@@@@@@%%@@@@@=..
-          .:#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=.
-         ..@@@@@==*%@@@@@@@@@@@@@@*-.:-@@@@%:
-        .:@@@@*. ...::-==++==-::.       :@@@@-
-         -@@@=......                     .@%@%
-         .@@+.......                      -+#*
-         .@%=........                     .=**
-          @@=.........                    .+**
-          +@- .                            *#+.
-           @: :-=+++=-:.. .....:-==+=-:.   @%:
-          .@..+==+*####*-:.. .-=+*%*--...  @:
-           #...:+#=**-+*+-.  .=*=+#-.-.    -::
-           =.........::..:.     :.        . .=
-            :...   ......::.                +
-             :....    .:.....               .
-             :......:--:=-.. .: ..        :=
-             +.........:*#=- ..   .      :#
-             *:.....:=*@@#=@#@*-:.       =
-             *+::.:*@@*==-:::.:-*@+.    .*
-              *=-:.=+::*.jesus.   -*   . *
-               *-.:=:.:#.christ.   -: ..+@#
-              %@@-*@+-..-=-:.   .:-*:- :@%#
-            @@@@@@:+@@*+=-:::.:-+%@*  .@%%%
-         #@@@@@@@@* =@@@@*%#+*%@@+  .#@@%@**#@%%#
-       #@@@@@@@@@@@#..=#@@@@@#+: .=@@@@%@#*##%%@@@@
-   ##@@@@@@@@@@@@@@@@=:..    .:+@@@@@@@@%**##%%%@@@%@@%#%
-%@@@@@@@@@@@@@@@@@@@@@@#+++*#@@@@@@@@@@%####%%@@@@@@@@ahr.</pre>
-      </figure>
+      {% include profile-portrait.html banner=banner name=profile_name %}
     </section>
 
+    {% if artwork != empty %}
     <details class="ascii-artwork">
       <summary>Full ASCII artwork</summary>
       <div class="ascii-scroll" role="region" aria-label="Full ASCII artwork" tabindex="0">
-        <pre role="img" aria-label="The original ASCII banner with Alex Raber's name and portrait">
-  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │                                                                                                             │
-  │        █████╗ ██╗     ███████╗██╗  ██╗      ██╗  ██╗         ██████╗  █████╗ ██████╗ ███████╗██████╗        │
-  │       ██╔══██╗██║     ██╔════╝╚██╗██╔╝      ██║  ██║         ██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗       │
-  │       ███████║██║     █████╗   ╚███╔╝       ███████║         ██████╔╝███████║██████╔╝█████╗  ██████╔╝       │
-  │       ██╔══██║██║     ██╔══╝   ██╔██╗       ██╔══██║         ██╔══██╗██╔══██║██╔══██╗██╔══╝  ██╔══██╗       │
-  │       ██║  ██║███████╗███████╗██╔╝ ██╗      ██║  ██║██╗      ██║  ██║██║  ██║██████╔╝███████╗██║  ██║       │
-  │       ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝      ╚═╝  ╚═╝╚═╝      ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝       │
-  │                                                                                                             │
-  │                                            ahr*#%###*=-.                                                    │
-  │                                      ..-#@@@@@@@@@@@@@@@#=:..                                               │
-  │                                     ..=@@@@@@@@@@@@@@@@@@@@@*:...                                           │
-  │                                   ..:%@@@@@@@@@@@@@@@@@@%%@@@@@=..                                          │
-  │                                  .:#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=.                                         │
-  │                                 ..@@@@@==*%@@@@@@@@@@@@@@*-.:-@@@@%:                                        │
-  │                                .:@@@@*. ...::-==++==-::.       :@@@@-                                       │
-  │                                 -@@@=......                     .@%@%                                       │
-  │                                 .@@+.......                      -+#*                                       │
-  │                                 .@%=........                     .=**                                       │
-  │                                  @@=.........                    .+**                                       │
-  │                                  +@- .                            *#+.                                      │
-  │                                   @: :-=+++=-:.. .....:-==+=-:.   @%:                                       │
-  │                                  .@..+==+*####*-:.. .-=+*%*--...  @:                                        │
-  │                                   #...:+#=**-+*+-.  .=*=+#-.-.    -::                                       │
-  │                                   =.........::..:.     :.        . .=                                       │
-  │                                    :...   ......::.                +                                        │
-  │                                     :....    .:.....               .                                        │
-  │                                     :......:--:=-.. .: ..        :=                                         │
-  │                                     +.........:*#=- ..   .      :#                                          │
-  │                                     *:.....:=*@@#=@#@*-:.       =                                           │
-  │                                     *+::.:*@@*==-:::.:-*@+.    .*                                           │
-  │                                      *=-:.=+::*.jesus.   -*   . *                                           │
-  │                                       *-.:=:.:#.christ.   -: ..+@#                                          │
-  │                                      %@@-*@+-..-=-:.   .:-*:- :@%#                                          │
-  │                                    @@@@@@:+@@*+=-:::.:-+%@*  .@%%%                                          │
-  │                                 #@@@@@@@@* =@@@@*%#+*%@@+  .#@@%@**#@%%#                                    │
-  │                               #@@@@@@@@@@@#..=#@@@@@#+: .=@@@@%@#*##%%@@@@                                  │
-  │                           ##@@@@@@@@@@@@@@@@=:..    .:+@@@@@@@@%**##%%%@@@%@@%#%                            │
-  │                        %@@@@@@@@@@@@@@@@@@@@@@#+++*#@@@@@@@@@@%####%%@@@@@@@@ahr.                           │
-  │                                                                                                             │
-  │                                founder · engineer · architect · researcher                                  │
-  │                                                                                                             │
-  └─────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-</pre>
+        <pre role="img" aria-label="The original ASCII banner with {{ profile_name | escape_once }}'s name and portrait">{{ artwork | escape }}</pre>
       </div>
     </details>
+    {% endif %}
 
+    {% if research_items.size > 1 %}
     <section id="research" class="section research" aria-labelledby="research-title">
       <h2 id="research-title" class="section-title"><span aria-hidden="true">✦</span> Selected research</h2>
       <ul class="research-list">
+        {% for item in research_items offset:1 %}
+        {% assign entry = item | split: '</li>' | first %}
+        {% assign research_url = entry | split: 'href="' | last | split: '"' | first %}
+        {% assign research_title = entry | split: '</a>' | first | strip_html | strip %}
+        {% assign description_parts = entry | split: '<small>' %}
+        {% assign description = description_parts[1] | split: '</small>' | first | strip_html | strip %}
         <li>
-          <a class="research-link" href="https://decapodlabs.github.io/accountable-agentic-execution/">
+          <a class="research-link" href="{{ research_url | escape_once }}">
             <div>
-              <h3>Accountable Agentic Execution</h3>
-              <p>Evidence and accountability for agentic execution.</p>
+              <h3>{{ research_title | escape_once }}</h3>
+              {% if description != empty %}<p>{{ description | escape_once }}</p>{% endif %}
             </div>
             <span class="research-arrow" aria-hidden="true">↗</span>
           </a>
         </li>
-        <li>
-          <a class="research-link" href="https://alexhraber.github.io/agentic-sdlc-intake-attack/">
-            <div>
-              <h3>Agentic SDLC collaboration‑plane injection</h3>
-              <p>The collaboration plane as an attack surface in agentic software delivery.</p>
-            </div>
-            <span class="research-arrow" aria-hidden="true">↗</span>
-          </a>
-        </li>
-        <li>
-          <a class="research-link" href="https://alexhraber.github.io/metaplay-fake-interview-supply-chain-incident/">
-            <div>
-              <h3>Metaplay — fake‑interview supply‑chain attack</h3>
-              <p>An incident write-up on a fake interview and a staged supply-chain attack.</p>
-            </div>
-            <span class="research-arrow" aria-hidden="true">↗</span>
-          </a>
-        </li>
+        {% endfor %}
       </ul>
     </section>
+    {% endif %}
 
+    {% if tool_items.size > 1 or domains.size > 0 %}
     <section id="toolkit" class="section toolkit" aria-labelledby="toolkit-title">
       <h2 id="toolkit-title" class="section-title"><span aria-hidden="true">✦</span> Toolkit</h2>
       <div class="toolkit-grid">
+        {% if tool_items.size > 1 %}
         <div class="toolkit-panel">
           <h3>Tools</h3>
           <ul class="tool-list">
-            <li>AWS</li>
-            <li>Bazel</li>
-            <li>Buildkite</li>
-            <li>eBPF</li>
-            <li>Go</li>
-            <li>GitHub Actions</li>
-            <li>JAX</li>
-            <li>Kafka</li>
-            <li>Kubernetes</li>
-            <li>MLX</li>
-            <li>Neon</li>
-            <li>NixOS</li>
-            <li>Postgres</li>
-            <li>Python</li>
-            <li>Redis</li>
-            <li>Rust</li>
-            <li>SQLite</li>
-            <li>TensorFlow</li>
-            <li>Terraform</li>
-            <li>TypeScript</li>
-            <li>Vercel</li>
+            {% for tool in tool_items offset:1 %}
+            {% assign alt_parts = tool | split: 'alt="' %}
+            {% assign tool_name = alt_parts[1] | split: '"' | first | strip %}
+            {% if tool_name != empty %}<li>{{ tool_name | escape_once }}</li>{% endif %}
+            {% endfor %}
           </ul>
         </div>
+        {% endif %}
+        {% if domains.size > 0 %}
         <div class="toolkit-panel">
           <h3>Domains</h3>
           <ul class="domain-list">
-            <li>Agents</li>
-            <li>CI/CD</li>
-            <li>Cloud</li>
-            <li>Containers</li>
-            <li>Distributed systems</li>
-            <li>Governance</li>
-            <li>Kernel engineering</li>
-            <li>Linux</li>
-            <li>Security</li>
-            <li>Service mesh</li>
-            <li>SRE</li>
+            {% for domain in domains %}
+            {% assign domain_name = domain | strip %}
+            {% if domain_name != empty %}<li>{{ domain_name | escape_once }}</li>{% endif %}
+            {% endfor %}
           </ul>
         </div>
+        {% endif %}
       </div>
     </section>
+    {% endif %}
   </main>
 
+  {% if contact_links.size > 1 %}
   <footer id="contact" class="site-footer">
     <div class="frame footer-inner">
       <h2>Get in touch<span aria-hidden="true">.</span></h2>
       <ul class="contact-links">
-        <li><a href="mailto:alexhraber@gmail.com">Email <span aria-hidden="true">↗</span></a></li>
-        <li><a href="./assets/alex-raber-resume.pdf">Résumé <span aria-hidden="true">↗</span></a></li>
-        <li><a href="https://github.com/sponsors/alexhraber">GitHub Sponsors <span aria-hidden="true">↗</span></a></li>
-        <li><a href="https://ko-fi.com/decapodlabs">Ko-fi Decapod <span aria-hidden="true">↗</span></a></li>
+        {% for contact_link in contact_links offset:1 %}
+        {% assign anchor = contact_link | split: '</a>' | first %}
+        {% assign tag = anchor | split: '>' | first %}
+        {% assign contact_url = tag | split: 'href="' | last | split: '"' | first %}
+        {% assign contact_text = anchor | remove_first: tag | remove_first: '>' | strip_html | remove: '✦' | strip %}
+        {% if contact_text == empty %}
+          {% assign image_alt = anchor | split: 'alt="' %}
+          {% assign contact_text = image_alt[1] | split: '"' | first | strip %}
+        {% endif %}
+        {% if contact_text != empty %}
+        <li><a href="{{ contact_url | escape_once }}">{{ contact_text | escape_once }} <span aria-hidden="true">↗</span></a></li>
+        {% endif %}
+        {% endfor %}
       </ul>
       <a class="back-to-top" href="#top">Back to top <span aria-hidden="true">↑</span></a>
     </div>
   </footer>
+  {% endif %}
 </body>
 </html>
