@@ -1,0 +1,43 @@
+{%- assign portrait_parts = include.banner | split: '<!-- profile:portrait -->' -%}
+{%- assign portrait_source = portrait_parts[1] | split: '<!-- /profile:portrait -->' | first | default: include.banner -%}
+{%- capture newline %}
+{% endcapture -%}
+{%- assign source_lines = portrait_source | split: newline -%}
+{%- capture unframed_lines -%}
+  {%- for line in source_lines -%}
+    {%- assign edge = line | strip -%}
+    {%- assign first_char = edge | slice: 0 -%}
+    {%- assign last_char = edge | slice: -1 -%}
+    {%- if portrait_parts.size > 1 and first_char == '│' and last_char == '│' -%}
+      {%- assign inner_length = edge.size | minus: 2 -%}
+      {{- edge | slice: 1, inner_length | rstrip -}}
+    {%- else -%}
+      {{- line | rstrip -}}
+    {%- endif -%}
+    {{- newline -}}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- assign rows = unframed_lines | split: newline -%}
+{%- assign left_padding = nil -%}
+{%- assign longest_row = 1 -%}
+{%- for row in rows -%}
+  {%- assign content = row | lstrip -%}
+  {%- unless content == empty -%}
+    {%- assign padding = row.size | minus: content.size -%}
+    {%- if left_padding == nil or padding < left_padding -%}
+      {%- assign left_padding = padding -%}
+    {%- endif -%}
+    {%- if row.size > longest_row -%}
+      {%- assign longest_row = row.size -%}
+    {%- endif -%}
+  {%- endunless -%}
+{%- endfor -%}
+{%- assign left_padding = left_padding | default: 0 -%}
+{%- assign portrait_columns = longest_row | minus: left_padding | at_least: 1 -%}
+{%- if rows.size > 0 %}
+<figure class="portrait" role="img" aria-label="ASCII portrait of {{ include.name | escape_once }}" style="--portrait-columns: {{ portrait_columns }}; --portrait-rows: {{ rows.size }}">
+  <span class="portrait-registration" aria-hidden="true"></span>
+  <pre aria-hidden="true">{% for row in rows %}{{ row | slice: left_padding, longest_row | escape }}{% unless forloop.last %}{{ newline }}{% endunless %}{% endfor %}</pre>
+</figure>
+{%- endif -%}
