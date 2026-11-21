@@ -6,8 +6,10 @@ The markers in README.md define the content for each homepage section.
 {%- capture readme -%}{% include_relative README.md %}{%- endcapture -%}
 {%- assign name_parts = readme | split: '<!-- profile:name=' -%}
 {%- assign profile_name = name_parts[1] | split: '-->' | first | strip -%}
-{%- assign given_name = profile_name | split: ' ' | first -%}
-{%- assign family_name = profile_name | remove_first: given_name | strip -%}
+{%- assign name_words = profile_name | split: ' ' -%}
+{%- assign leading_word_count = name_words.size | minus: 1 -%}
+{%- assign leading_names = name_words | slice: 0, leading_word_count | join: ' ' -%}
+{%- assign surname = name_words | last -%}
 {%- assign role_parts = readme | split: '<!-- profile:roles=' -%}
 {%- assign roles = role_parts[1] | split: '-->' | first | strip -%}
 {%- assign role_items = roles | split: '·' -%}
@@ -60,7 +62,7 @@ The markers in README.md define the content for each homepage section.
   <main id="main" class="frame">
     <section class="hero" aria-labelledby="name">
       <div class="hero-copy">
-        <h1 id="name">{{ given_name | escape_once }}{% if family_name != empty %} <span>{{ family_name | escape_once }}<span class="name-period" aria-hidden="true">.</span></span>{% endif %}</h1>
+        <h1 id="name">{% if leading_word_count > 0 %}{{ leading_names | escape_once }} <span>{{ surname | escape_once }}</span>{% else %}{{ profile_name | escape_once }}{% endif %}</h1>
         {% if role_items.size > 0 %}
         <p class="roles">{% for role in role_items %}{% unless forloop.first %} <span>·</span> {% endunless %}{{ role | strip | escape_once }}{% endfor %}</p>
         {% endif %}

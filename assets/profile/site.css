@@ -135,6 +135,7 @@ ul {
 
 .hero-copy {
   grid-column: 1 / -1;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -148,21 +149,17 @@ ul {
 }
 
 .hero h1 {
+  --headline-size: clamp(5.6rem, 12.65vw, 11.5rem);
   max-width: 100%;
   margin-left: -0.035em;
-  font: 800 clamp(5.6rem, 12.65vw, 11.5rem)/0.79 var(--display);
+  font: 800 min(var(--headline-size), 32cqi)/0.79 var(--display);
   letter-spacing: -0.025em;
-  overflow-wrap: anywhere;
   text-transform: uppercase;
 }
 
 .hero h1 > span {
   display: block;
   color: var(--accent);
-}
-
-.name-period {
-  color: var(--ink);
 }
 
 .roles {
@@ -565,7 +562,7 @@ ul {
   }
 
   .hero h1 {
-    font-size: clamp(5rem, 22vw, 9.7rem);
+    --headline-size: clamp(5rem, 22vw, 9.7rem);
   }
 
   .roles {
