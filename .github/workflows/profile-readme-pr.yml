@@ -1,0 +1,44 @@
+name: Open profile README pull request
+
+on:
+  push:
+    branches: [sync-profile-readme]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: profile-readme-pr
+  cancel-in-progress: false
+
+jobs:
+  open:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BASE_BRANCH: master
+      SYNC_BRANCH: sync-profile-readme
+    steps:
+      - name: Open or refresh the README pull request
+        shell: bash
+        run: |
+          set -euo pipefail
+          number=$(gh pr list --base "$BASE_BRANCH" --head "$SYNC_BRANCH" \
+            --state open --json number --jq '.[0].number // empty')
+          changed=$(gh api "repos/$GH_REPO/compare/$BASE_BRANCH...$SYNC_BRANCH" --jq '.files | length')
+
+          if [[ "$changed" == 0 ]]; then
+            if [[ -n "$number" ]]; then
+              gh pr close "$number" --comment 'The source README now matches the published branch.'
+            fi
+          elif [[ -z "$number" ]]; then
+            gh pr create --base "$BASE_BRANCH" --head "$SYNC_BRANCH" \
+              --title 'Sync profile README' \
+              --body 'Updates the site content from the README in alexhraber/alexhraber. Merging this pull request rebuilds GitHub Pages.'
+          else
+            gh pr view "$number" --json url --jq .url
+          fi
